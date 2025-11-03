@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tarik Tambang Matematika</title>
+    <!-- Memuat Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Menggunakan font Inter dari Tailwind */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Transisi untuk penanda tali */
+        #marker {
+            transition: left 0.5s ease-out;
+        }
+        /* Style untuk tombol keypad agar responsif saat disentuh/diklik */
+        .keypad-btn:active {
+            transform: scale(0.95);
+            background-color: #d1d5db; /* gray-300 */
+        }
+        
+        /* === TAMBAHAN CSS UNTUK GAMBAR MENGAMBANG === */
+        @keyframes bounce-light {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .floating-image-container {
+            position: fixed;
+            bottom: 60px; /* Di atas footer (footer sekitar 40-50px) */
+            right: 1rem;
+            z-index: 100;
+        }
+
+        .floating-image {
+            height: 100px; /* Ukuran proporsional */
+            width: auto;
+            animation: bounce-light 2s infinite ease-in-out;
+            /* Filter bayangan agar lebih terlihat */
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+        }
+        /* === AKHIR TAMBAHAN CSS === */
+
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col items-center justify-center p-4 font-sans">
+
+    <div class="w-full max-w-4xl bg-white p-6 md:p-8 rounded-2xl shadow-xl">
+        
+        <!-- === TAMBAHAN LOGO SEKOLAH === -->
+        <img src="https://ik.imagekit.io/ammank94/Ammank/Logo%20YPS,%20GRS,%20Cambride.png?updatedAt=1761665128456" 
+             alt="Logo Sekolah" 
+             class="h-20 w-auto mx-auto mb-4" 
+             onerror="this.style.display='none'">
+        <!-- === AKHIR TAMBAHAN LOGO === -->
+
+        <!-- Judul -->
+        <h1 class="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-6">
+            Tarik Tambang Matematika
+        </h1>
+
+        <!-- Status Permainan -->
+        <div id="status-message" class="text-center text-2xl font-semibold text-purple-600 mb-8 h-8">
+            Mulai Bermain!
+        </div>
+
+        <!-- Visual Tarik Tambang -->
+        <div class="w-full max-w-3xl mx-auto mb-10">
+            <div class="bg-gray-300 h-10 rounded-full relative shadow-inner flex items-center">
+                <!-- Zona Kemenangan Biru (Kiri) -->
+                <div class="absolute left-0 top-0 bottom-0 w-[10%] bg-blue-200 rounded-l-full z-0"></div>
+                <!-- Garis Batas Kiri -->
+                <div class="absolute left-[10%] top-0 bottom-0 w-1.5 bg-blue-400 rounded-full opacity-50"></div>
+                
+                <!-- Zona Kemenangan Merah (Kanan) -->
+                <div class="absolute right-0 top-0 bottom-0 w-[10%] bg-red-200 rounded-r-full z-0"></div>
+                <!-- Garis Batas Kanan -->
+                <div class="absolute right-[10%] top-0 bottom-0 w-1.5 bg-red-400 rounded-full opacity-50"></div>
+
+                <!-- Penanda Tali (Marker) -->
+                <div id="marker" class="absolute w-12 h-12 rounded-full bg-yellow-400 border-4 border-white shadow-lg z-10" style="left: 50%; transform: translateX(-50%);">
+                    <!-- Ikon tali/pegangan sederhana -->
+                    <div class="w-2 h-6 bg-yellow-600 absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 opacity-50 rounded"></div>
+                </div>
+            </div>
+            <div class="flex justify-between w-full text-sm font-medium text-gray-600 mt-2 px-1">
+                <span class="text-blue-600">🏁 Tim Biru: <span id="blue-percentage" class="font-bold">50%</span></span>
+                <span class="text-red-600">Tim Merah: <span id="red-percentage" class="font-bold">50%</span> 🏁</span>
+            </div>
+        </div>
+
+        <!-- Panel Permainan (Kiri & Kanan) -->
+        <div class="flex flex-col md:flex-row justify-between w-full gap-6">
+
+            <!-- Panel Tim Kiri (Biru) -->
+            <div id="left-panel" class="flex-1 bg-white p-6 rounded-lg shadow-md border-4 border-blue-500 transition-all duration-300">
+                <h2 class="text-2xl font-bold text-center text-blue-600 mb-4">Tim Biru</h2>
+                <div id="left-question" class="text-4xl md:text-5xl font-mono font-bold text-center my-6 h-16 flex items-center justify-center">
+                    ...
+                </div>
+                <!-- Input diubah ke type="text" untuk keypad kustom -->
+                <input type="text" id="left-answer" placeholder="Jawaban..." inputmode="numeric" pattern="[0-9-]*" class="w-full p-3 text-lg border-2 border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-400">
+                
+                <!-- Keypad Kiri -->
+                <div class="grid grid-cols-3 gap-2 mt-3">
+                    <button data-value="7" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">7</button>
+                    <button data-value="8" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">8</button>
+                    <button data-value="9" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">9</button>
+                    <button data-value="4" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">4</button>
+                    <button data-value="5" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">5</button>
+                    <button data-value="6" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">6</button>
+                    <button data-value="1" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">1</button>
+                    <button data-value="2" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">2</button>
+                    <button data-value="3" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">3</button>
+                    <button data-value="minus" class="keypad-btn bg-gray-300 p-3 rounded-lg text-lg font-semibold hover:bg-gray-400 transition-all">-</button>
+                    <button data-value="0" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">0</button>
+
+                    <button data-value="backspace" class="keypad-btn bg-gray-300 p-3 rounded-lg text-lg font-semibold hover:bg-gray-400 transition-all">⌫</button>
+                </div>
+                
+                <button id="left-submit" class="w-full bg-blue-500 text-white p-3 rounded-lg font-semibold text-lg mt-3 hover:bg-blue-600 active:bg-blue-700 transition-colors disabled:opacity-50">
+                    Kirim
+                </button>
+                <p class="text-center text-gray-700 mt-4 text-lg">
+                    Skor: <span id="left-score" class="font-bold">0</span>
+                </p>
+            </div>
+
+            <!-- Panel Tim Kanan (Merah) -->
+            <div id="right-panel" class="flex-1 bg-white p-6 rounded-lg shadow-md border-4 border-red-500 transition-all duration-300">
+                <h2 class="text-2xl font-bold text-center text-red-600 mb-4">Tim Merah</h2>
+                <div id="right-question" class="text-4xl md:text-5xl font-mono font-bold text-center my-6 h-16 flex items-center justify-center">
+                    ...
+                </div>
+                <!-- Input diubah ke type="text" untuk keypad kustom -->
+                <input type="text" id="right-answer" placeholder="Jawaban..." inputmode="numeric" pattern="[0-9-]*" class="w-full p-3 text-lg border-2 border-gray-300 rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-red-400">
+                
+                <!-- Keypad Kanan -->
+                <div class="grid grid-cols-3 gap-2 mt-3">
+                    <button data-value="7" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">7</button>
+                    <button data-value="8" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">8</button>
+                    <button data-value="9" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">9</button>
+                    <button data-value="4" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">4</button>
+                    <button data-value="5" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">5</button>
+                    <button data-value="6" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">6</button>
+                    <button data-value="1" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">1</button>
+                    <button data-value="2" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">2</button>
+                    <button data-value="3" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">3</button>
+                    <button data-value="minus" class="keypad-btn bg-gray-300 p-3 rounded-lg text-lg font-semibold hover:bg-gray-400 transition-all">-</button>
+                    <button data-value="0" class="keypad-btn bg-gray-200 p-3 rounded-lg text-lg font-semibold hover:bg-gray-300 transition-all">0</button>
+                    <button data-value="backspace" class="keypad-btn bg-gray-300 p-3 rounded-lg text-lg font-semibold hover:bg-gray-400 transition-all">⌫</button>
+                </div>
+
+                <button id="right-submit" class="w-full bg-red-500 text-white p-3 rounded-lg font-semibold text-lg mt-3 hover:bg-red-600 active:bg-red-700 transition-colors disabled:opacity-50">
+                    Kirim
+                </button>
+                <p class="text-center text-gray-700 mt-4 text-lg">
+                    Skor: <span id="right-score" class="font-bold">0</span>
+                </p>
+            </div>
+
+        </div>
+
+        <!-- Tombol Reset -->
+        <div class="text-center mt-10">
+            <button id="reset-button" class="bg-gray-500 text-white py-2 px-6 rounded-lg font-semibold text-lg hover:bg-gray-600 active:bg-gray-700 transition-colors">
+                Mulai Ulang
+            </button>
+        </div>
+
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Seleksi Elemen DOM ---
+            const leftPanel = document.getElementById('left-panel');
+            const leftQuestionEl = document.getElementById('left-question');
+            const leftAnswerEl = document.getElementById('left-answer');
+            const leftSubmitBtn = document.getElementById('left-submit');
+            const leftScoreEl = document.getElementById('left-score');
+
+            const rightPanel = document.getElementById('right-panel');
+            const rightQuestionEl = document.getElementById('right-question');
+            const rightAnswerEl = document.getElementById('right-answer');
+            const rightSubmitBtn = document.getElementById('right-submit');
+            const rightScoreEl = document.getElementById('right-score');
+
+            const marker = document.getElementById('marker');
+            const statusMessage = document.getElementById('status-message');
+            const resetButton = document.getElementById('reset-button');
+            
+            // Elemen persentase baru
+            const bluePercentageEl = document.getElementById('blue-percentage');
+            const redPercentageEl = document.getElementById('red-percentage');
+
+            // --- Variabel Status Game ---
+            let leftScore = 0;
+            let rightScore = 0;
+            let leftCorrectAnswer = 0;
+            let rightCorrectAnswer = 0;
+            
+            let ropePosition = 50; 
+            
+            const PULL_STRENGTH = 5; 
+            const MISTAKE_PENALTY = 2;
+            const WIN_THRESHOLD_LOW = 10;
+            const WIN_THRESHOLD_HIGH = 90;
+
+            let gameActive = true;
+
+            // --- Fungsi Logika Game ---
+
+            /**
+             * Menghasilkan soal aritmetika sederhana (+, -, *)
+             */
+            function generateQuestion() {
+                const operators = ['+', '-', '*'];
+                const op = operators[Math.floor(Math.random() * operators.length)];
+                let num1, num2, answer, questionText;
+
+                if (op === '*') {
+                    num1 = Math.floor(Math.random() * 12) + 1;
+                    num2 = Math.floor(Math.random() * 12) + 1;
+                } else {
+                    num1 = Math.floor(Math.random() * 20) + 1;
+                    num2 = Math.floor(Math.random() * 20) + 1;
+                }
+
+                questionText = `${num1} ${op} ${num2}`;
+
+                switch (op) {
+                    case '+':
+                        answer = num1 + num2;
+                        break;
+                    case '-':
+                        answer = num1 - num2;
+                        break;
+                    case '*':
+                        answer = num1 * num2;
+                        break;
+                }
+
+                return { questionText, answer };
+            }
+
+            /**
+             * Menampilkan soal baru untuk tim tertentu (left/right)
+             */
+            function setNewQuestion(side) {
+                const { questionText, answer } = generateQuestion();
+                if (side === 'left') {
+                    leftQuestionEl.textContent = questionText;
+                    leftCorrectAnswer = answer;
+                    leftAnswerEl.value = '';
+                } else {
+                    rightQuestionEl.textContent = questionText;
+                    rightCorrectAnswer = answer;
+                    rightAnswerEl.value = '';
+                }
+            }
+
+            /**
+             * Memperbarui posisi visual penanda tali
+             */
+            function updateRopeVisual() {
+                // 1. Perbarui posisi marker (0-100)
+                ropePosition = Math.max(0, Math.min(100, ropePosition));
+                marker.style.left = `${ropePosition}%`;
+
+                // 2. Hitung persentase untuk tampilan (berdasarkan rentang 10-90)
+                // Clamp posisi untuk kalkulasi persentase antara 10% dan 90%
+                const clampedPos = Math.max(WIN_THRESHOLD_LOW, Math.min(WIN_THRESHOLD_HIGH, ropePosition));
+                
+                // Konversi rentang 10-90 (80 poin) menjadi 0-100
+                // (clampedPos - 10) / 80 * 100
+                const battlePos = (clampedPos - WIN_THRESHOLD_LOW) / (WIN_THRESHOLD_HIGH - WIN_THRESHOLD_LOW) * 100;
+
+                const redPercent = Math.round(battlePos);
+                const bluePercent = 100 - redPercent;
+
+                // 3. Perbarui teks persentase
+                bluePercentageEl.textContent = `${bluePercent}%`;
+                redPercentageEl.textContent = `${redPercent}%`;
+            }
+
+            /**
+             * Memeriksa kondisi kemenangan
+             */
+            function checkWin() {
+                if (!gameActive) return;
+
+                if (ropePosition <= WIN_THRESHOLD_LOW) {
+                    statusMessage.textContent = "Tim Biru Menang! 🏆";
+                    statusMessage.classList.remove('text-purple-600');
+                    statusMessage.classList.add('text-blue-600');
+                    gameActive = false;
+                    disableInputs();
+                } else if (ropePosition >= WIN_THRESHOLD_HIGH) {
+                    statusMessage.textContent = "Tim Merah Menang! 🏆";
+                    statusMessage.classList.remove('text-purple-600');
+                    statusMessage.classList.add('text-red-600');
+                    gameActive = false;
+                    disableInputs();
+                }
+            }
+
+            /**
+             * Menonaktifkan input saat game berakhir
+             */
+            function disableInputs() {
+                leftAnswerEl.disabled = true;
+                leftSubmitBtn.disabled = true;
+                rightAnswerEl.disabled = true;
+                rightSubmitBtn.disabled = true;
+            }
+
+            /**
+             * Mengaktifkan input saat game dimulai/di-reset
+             */
+            function enableInputs() {
+                leftAnswerEl.disabled = false;
+                leftSubmitBtn.disabled = false;
+                rightAnswerEl.disabled = false;
+                rightSubmitBtn.disabled = false;
+            }
+
+            /**
+             * Menampilkan umpan balik visual (border) saat menjawab
+             */
+            function flashFeedback(side, type) {
+                const panel = (side === 'left') ? leftPanel : rightPanel;
+                const correctColor = (side === 'left') ? 'border-green-500' : 'border-green-500';
+                const incorrectColor = (side === 'left') ? 'border-red-700' : 'border-red-700'; 
+                const originalColor = (side === 'left') ? 'border-blue-500' : 'border-red-500';
+                
+                const feedbackColor = (type === 'correct') ? correctColor : incorrectColor;
+
+                panel.classList.remove(originalColor);
+                panel.classList.add(feedbackColor);
+
+                setTimeout(() => {
+                    panel.classList.remove(feedbackColor);
+                    panel.classList.add(originalColor);
+                }, 400);
+            }
+
+            /**
+             * Menangani logika saat jawaban dikirim
+             */
+            function handleAnswer(side) {
+                if (!gameActive) return;
+
+                const answerInput = (side === 'left') ? leftAnswerEl : rightAnswerEl;
+                const correctAnswer = (side === 'left') ? leftCorrectAnswer : rightCorrectAnswer;
+                const scoreDisplay = (side === 'left') ? leftScoreEl : rightScoreEl;
+                
+                // ParseInt aman digunakan di sini, ia akan mengabaikan
+                // karakter non-numerik setelah angka pertama (termasuk spasi)
+                // dan menangani tanda minus dengan benar.
+                const userAnswer = parseInt(answerInput.value, 10);
+
+                if (userAnswer === correctAnswer) {
+                    // Jawaban Benar
+                    flashFeedback(side, 'correct');
+                    if (side === 'left') {
+                        leftScore++;
+                        ropePosition -= PULL_STRENGTH;
+                        scoreDisplay.textContent = leftScore;
+                    } else {
+                        rightScore++;
+                        ropePosition += PULL_STRENGTH;
+                        scoreDisplay.textContent = rightScore;
+                    }
+                } else {
+                    // Jawaban Salah
+                    flashFeedback(side, 'incorrect');
+                    if (side === 'left') {
+                        ropePosition += MISTAKE_PENALTY;
+                    } else {
+                        ropePosition -= MISTAKE_PENALTY;
+                    }
+                }
+
+                updateRopeVisual();
+                setNewQuestion(side); 
+                checkWin();
+            }
+
+            /**
+             * Menangani klik pada keypad numerik
+             */
+            function handleKeypadClick(side, value) {
+                const inputEl = (side === 'left') ? leftAnswerEl : rightAnswerEl;
+
+                switch (value) {
+                    case 'backspace':
+                        inputEl.value = inputEl.value.slice(0, -1);
+                        break;
+                    case 'minus':
+                        // Hanya tambahkan minus jika di awal dan belum ada
+                        if (inputEl.value.length === 0) {
+                            inputEl.value = '-';
+                        }
+                        break;
+                    default: // Angka
+                        inputEl.value += value;
+                        break;
+                }
+                inputEl.focus(); // Jaga fokus pada input
+            }
+
+
+            /**
+             * Mengatur ulang permainan ke kondisi awal
+             */
+            function resetGame() {
+                leftScore = 0;
+                rightScore = 0;
+                ropePosition = 50;
+                gameActive = true;
+
+                statusMessage.textContent = "Mulai Bermain!";
+                statusMessage.classList.remove('text-blue-600', 'text-red-600');
+                statusMessage.classList.add('text-purple-600');
+
+                leftScoreEl.textContent = '0';
+                rightScoreEl.textContent = '0';
+
+                updateRopeVisual();
+                enableInputs();
+                setNewQuestion('left');
+                setNewQuestion('right');
+
+                leftAnswerEl.focus();
+            }
+
+            // --- Event Listeners ---
+            leftSubmitBtn.addEventListener('click', () => handleAnswer('left'));
+            rightSubmitBtn.addEventListener('click', () => handleAnswer('right'));
+            resetButton.addEventListener('click', resetGame);
+
+            // Izinkan submit dengan tombol 'Enter'
+            leftAnswerEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    handleAnswer('left');
+                }
+            });
+
+            rightAnswerEl.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    handleAnswer('right');
+                }
+            });
+
+            // --- Event Listeners untuk Keypad (Delegasi) ---
+            leftPanel.addEventListener('click', (e) => {
+                const button = e.target.closest('.keypad-btn');
+                if (!button || !gameActive) return;
+                e.preventDefault(); // Mencegah submit form jika ada
+                const value = button.dataset.value;
+                handleKeypadClick('left', value);
+            });
+
+            rightPanel.addEventListener('click', (e) => {
+                const button = e.target.closest('.keypad-btn');
+                if (!button || !gameActive) return;
+                e.preventDefault();
+                const value = button.dataset.value;
+                handleKeypadClick('right', value);
+            });
+
+
+            // Memulai game saat halaman dimuat
+            resetGame();
+        });
+    </script>
+
+    <!-- Running Text Footer -->
+    <footer class="fixed bottom-0 left-0 w-full bg-gray-900 text-white py-2 z-50">
+        <marquee behavior="scroll" direction="left" scrollamount="6">
+            @2025. SMP YPS SINGKOLE. Dikembangkan dengan AI oleh Abdul Rahman, S.Pd., M.Pd.
+        </marquee>
+    </footer>
+
+    <!-- === TAMBAHAN GAMBAR MENGAMBANG === -->
+    <div class="floating-image-container">
+        <img src="https://ik.imagekit.io/ammank94/Ammank/Abdul_Rahman-1-removebg-preview.png?updatedAt=1761664917168" 
+             alt="Foto Abdul Rahman" 
+             class="floating-image"
+             onerror="this.style.display='none'"> <!-- Sembunyikan jika gambar gagal dimuat -->
+    </div>
+    <!-- === AKHIR TAMBAHAN GAMBAR === -->
+
+</body>
+</html>
+
+
+
